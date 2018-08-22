@@ -4,8 +4,8 @@
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 from flask import Flask, request, abort
 from marshmallow import Schema, fields, pprint
-import translate, re
-import json
+from googletrans import Translator
+import json, re
 
 # ==============================================================================
 # Schema definitions
@@ -37,26 +37,29 @@ class TranslationResultsSchema(Schema):
 # ==============================================================================
 
 app = Flask(__name__)
+translator = Translator()
 analyzer = SentimentIntensityAnalyzer()
 collectionSchema = SentimentCollectionSchema()
 resultsSchema = SentimentResultsSchema()
-translationResultsSchema = SentimentResultsSchema()
-separator = "{|[***]|}"
+translationResultsSchema = TranslationResultsSchema()
 
 # ==============================================================================
 # Application routes
 # ==============================================================================
 
 @app.route("/translations", methods=['POST'])
-def translateSentiments():
+def translations():
     jsonData = request.json
     documents = jsonData['documents']
-    to_lang = jsonData["to_lang"]
-    from_lang = jsonData["from_lang"]
-    translator = translate.Translator(from_lang=from_lang, to_lang=to_lang)
-    text = separator.join(documents)
-    translated_text = translator.translate(text)
-    results = translated_text.split(separator) 
+    results = []
+    if len(documents) == 0:
+        abort(400)
+
+    translations = translator.translate(documents, dest='en')
+
+    for translation in translations:
+        results.append(translation.text)
+
     return translationResultsSchema.dumps(dict(results=results))
 
 @app.route('/sentiments', methods=['POST'])
