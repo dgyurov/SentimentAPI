@@ -52,6 +52,7 @@ def translations():
     jsonData = request.json
     documents = jsonData['documents']
     results = []
+        
     if len(documents) == 0:
         abort(400)
 
