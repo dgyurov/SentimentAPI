@@ -11,28 +11,6 @@ import requests
 # ==============================================================================
 # Schema definitions
 # ==============================================================================
-
-class SentimentSchema(Schema):
-    text = fields.String()
-    compound = fields.Float()
-    negative = fields.Float()
-    neutral = fields.Float()
-    positive = fields.Float()
-
-class SentimentCollectionSchema(Schema):
-    sentiments = fields.Nested(SentimentSchema(), many=True)
-    count = fields.Int()
-    compound = fields.Float()
-    negative = fields.Float()
-    neutral = fields.Float()
-    positive = fields.Float()
-
-class SentimentResultsSchema(Schema):
-    results = fields.Nested(SentimentCollectionSchema(), many=True)
-
-class TranslationResultsSchema(Schema):
-    results = fields.List(fields.String())
-
 class Review(Schema):
     class Meta:
         unknown = 'EXCLUDE'
@@ -104,10 +82,6 @@ class AppStoreEntry(Schema):
 
 app = Flask(__name__)
 analyzer = SentimentIntensityAnalyzer()
-collectionSchema = SentimentCollectionSchema()
-resultsSchema = SentimentResultsSchema()
-translator = Translator()
-translationResultsSchema = TranslationResultsSchema()
 
 # ==============================================================================
 # Application routes
