@@ -34,7 +34,7 @@ class Review(Schema):
     @pre_dump
     def move_name(self, data):
         if not data['name']:
-            data.pop('name')
+            data['name'] = 'Unknown user'
             return data
 
         return data
