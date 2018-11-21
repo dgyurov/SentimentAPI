@@ -11,11 +11,9 @@ class Review(Schema):
     class Meta:
         unknown = 'EXCLUDE'
 
-    name = fields.Str(required=False)
+    name = fields.Str()
     title = fields.Str(required=False)
-    titleEnglish = fields.Str(required=False)
     review = fields.Str()
-    reviewEnglish = fields.Str(required=False)
     stars = fields.Int()
     sentiment = fields.Float()
     date = fields.Str(required=False)
