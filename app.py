@@ -3,6 +3,8 @@
 
 import requests, json, re
 from flask import Flask, request, jsonify, Response
+from nltk.sentiment.vader import SentimentIntensityAnalyzer
+from resources.dutch_lexicon import dutch_lexicon
 from src.models import AppStoreEntry, PlayStoreEntry, Review
 from src.sentiments import Sentiments
 from src.errors import InvalidUsage
@@ -12,6 +14,8 @@ from src.errors import InvalidUsage
 # ==============================================================================
 
 app = Flask(__name__)
+analyzer = SentimentIntensityAnalyzer()
+analyzer.lexicon.update(dutch_lexicon)
 
 # ==============================================================================
 # Routes
@@ -49,7 +53,7 @@ def handleAppleReviews():
         title = entry['title']
         review = entry['review']
         documents = title + '. ' + review
-        sentiments = Sentiments.analyse(documents)
+        sentiments = Sentiments.analyse(documents, analyzer)
         compoundSentiment = sentiments['compound']
         entry['sentiment'] = compoundSentiment
 
@@ -77,7 +81,7 @@ def handleAndroidReviews():
         title = entry['title']
         review = entry['review']
         documents = title + '. ' + review
-        sentiments = Sentiments.analyse(documents)
+        sentiments = Sentiments.analyse(documents, analyzer)
         compoundSentiment = sentiments['compound']
         entry['sentiment'] = compoundSentiment
 
