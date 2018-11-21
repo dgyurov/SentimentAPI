@@ -8,7 +8,6 @@ pylint = "*"
 
 [packages]
 flask = "*"
-py-translator = "*"
 marshmallow = "*"
 nltk = "*"
 requests = "*"

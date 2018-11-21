@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 import re
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
+from dutch_lexicon import dutch_lexicon
 
 # ==============================================================================
 # Sentiment analysis functions
@@ -11,6 +12,7 @@ class Sentiments():
     @staticmethod
     def analyse(text):
         analyzer = SentimentIntensityAnalyzer()
+        analyzer.lexicon.update(dutch_lexicon)
         sentences_list = list(filter(None, re.split("[.!?]+", text)))
         count = len(sentences_list)
         sentiments_list = []
