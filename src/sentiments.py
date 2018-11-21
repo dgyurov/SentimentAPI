@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import re
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
-from dutch_lexicon import dutch_lexicon
+from resources.dutch_lexicon import dutch_lexicon
 
 # ==============================================================================
 # Sentiment analysis functions

@@ -3,9 +3,9 @@
 
 import requests, json, re
 from flask import Flask, request, jsonify, Response
-from models import AppStoreEntry, PlayStoreEntry, Review
-from sentiments import Sentiments
-from errors import InvalidUsage
+from src.models import AppStoreEntry, PlayStoreEntry, Review
+from src.sentiments import Sentiments
+from src.errors import InvalidUsage
 
 # ==============================================================================
 # Properties definitions
