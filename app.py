@@ -57,9 +57,9 @@ def handleAppleReviews():
         compoundSentiment = sentiments['compound']
         entry['sentiment'] = compoundSentiment
 
-    reviews = Review(many=True).dumps(entries)
-
-    response = Response(reviews.data)
+    reviews = Review(many=True).dump(entries)
+    
+    response = Response(json.dumps({"reviews": reviews.data}))
     response.headers['Content-Type'] = 'application/json'
     return response
 
@@ -85,9 +85,9 @@ def handleAndroidReviews():
         compoundSentiment = sentiments['compound']
         entry['sentiment'] = compoundSentiment
 
-    reviews = Review(many=True).dumps(entries)
-
-    response = Response(reviews.data)
+    reviews = Review(many=True).dump(entries)
+    
+    response = Response(json.dumps({"reviews": reviews.data}))
     response.headers['Content-Type'] = 'application/json'
     return response
 
