@@ -123,4 +123,3 @@ def validatePlayStoreParameters(appID):
     if not re.match(r'^([A-Za-z]{1}[A-Za-z\d_]*\.)*[A-Za-z][A-Za-z\d_]*$', appID):
         raise InvalidUsage('appID is an illigal Android application id', status_code=400)
 
-
