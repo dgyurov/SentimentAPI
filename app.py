@@ -61,6 +61,7 @@ def handleAppleReviews():
     
     response = Response(json.dumps({"reviews": reviews.data}))
     response.headers['Content-Type'] = 'application/json'
+    response.headers.add("Access-Control-Allow-Origin", "*")
     return response
 
 def handleAndroidReviews():
@@ -89,6 +90,7 @@ def handleAndroidReviews():
     
     response = Response(json.dumps({"reviews": reviews.data}))
     response.headers['Content-Type'] = 'application/json'
+    response.headers.add("Access-Control-Allow-Origin", "*")
     return response
 
 # ==============================================================================
