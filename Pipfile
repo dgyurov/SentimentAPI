@@ -10,8 +10,9 @@ pylint = "*"
 flask = "*"
 marshmallow = "*"
 nltk = "*"
-requests = "*"
 gunicorn = "*"
+aiohttp = "*"
+asyncio = "*"
 
 [requires]
 python_version = "3.7"
