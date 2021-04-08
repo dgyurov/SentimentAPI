@@ -8,6 +8,7 @@ from resources.dutch_lexicon import dutch_lexicon
 from src.models import AppStoreEntry, Review
 from src.sentiments import Sentiments
 from src.errors import InvalidUsage
+from collections import Counter
 
 # ==============================================================================
 # Properties definitions
@@ -34,13 +35,15 @@ def handleAppleReviews():
     appID = request.args.get('appID')
     pages = request.args.get('pages')
     pages = 1 if pages is None else int(pages)
+    stats = None
 
     validateAppStoreParameters(country, appID, pages)
 
     try:
         rawEntries = asyncio.run(get_appstore_reviews(country, appID, pages))
         entries = AppStoreEntry(many=True).load(rawEntries)
-    except:
+    except Exception as error:
+        app.logger.error(f'Network error => {error}')
         raise InvalidUsage('Something went wrong while trying to fetch data from the AppStore', status_code=500)
     
     for entry in entries:
@@ -52,11 +55,57 @@ def handleAppleReviews():
         entry['sentiment'] = compoundSentiment
 
     reviews = Review(many=True).dump(entries)
-    
-    response = Response(json.dumps({"reviews": reviews}))
+    jsonResponse = {"reviews" : reviews}
+
+    try:
+        jsonResponse['statistics'] = calculateStatistics(entries)
+    except Exception as error:
+        app.logger.warning(f'Statistics error => {error}')
+        pass
+
+    response = Response(json.dumps(jsonResponse))
     response.headers['Content-Type'] = 'application/json'
     response.headers.add("Access-Control-Allow-Origin", "*")
     return response
+
+# ==============================================================================
+# Utility functions
+# ==============================================================================
+
+def calculateStatistics(entries):
+    # Arrange
+    averageSentiment = 0
+    averageRating = 0
+    textCorpus = ""
+    stars = []
+    versions = {} 
+    statistics = {}
+
+    # Iterate
+    for entry in entries:
+        averageSentiment += entry['sentiment']
+        averageRating += entry['stars']
+        stars.append(entry['stars'])
+        key = entry['version']
+        value = entry['stars']
+        versions[key] = versions.get(key, []) + [value]
+        textCorpus += f"{entry['title']} {entry['review']} "
+
+    # Process
+    averageSentiment /= len(entries)
+    averageRating /= len(entries)
+    mostCommonWords = dict(Counter(textCorpus.split()).most_common(50))
+    ratingDistribution = dict(Counter(stars).most_common(6))
+    result = map(lambda v: (v[0], sum(v[1]) / len(v[1])), versions.items())
+    averagePerVersion = dict(result) 
+
+    # Pack
+    statistics['averageRating'] = averageRating
+    statistics['averageSentiment'] = averageSentiment
+    statistics['averagePerVersion'] = averagePerVersion
+    statistics['mostCommonWords'] = mostCommonWords
+    statistics['ratingDistribution'] = ratingDistribution
+    return statistics
 
 async def fetch_appstore_reviews(session, url):
     async with session.get(url) as resp:
