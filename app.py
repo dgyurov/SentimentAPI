@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import json, re, aiohttp, asyncio
+import json, re, aiohttp, asyncio, string
 from flask import Flask, request, jsonify, Response
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 from resources.dutch_lexicon import dutch_lexicon
@@ -9,6 +9,7 @@ from src.models import AppStoreEntry, Review
 from src.sentiments import Sentiments
 from src.errors import InvalidUsage
 from collections import Counter
+import nltk
 
 # ==============================================================================
 # Properties definitions
@@ -17,6 +18,7 @@ from collections import Counter
 app = Flask(__name__)
 analyzer = SentimentIntensityAnalyzer()
 analyzer.lexicon.update(dutch_lexicon)
+nltk.download('stopwords')
 
 # ==============================================================================
 # Routes
@@ -58,7 +60,8 @@ def handleAppleReviews():
     jsonResponse = {"reviews" : reviews}
 
     try:
-        jsonResponse['statistics'] = calculateStatistics(entries)
+        stopwords = localStopwords(country)
+        jsonResponse['statistics'] = calculateStatistics(entries, stopwords)
     except Exception as error:
         app.logger.warning(f'Statistics error => {error}')
         pass
@@ -72,13 +75,14 @@ def handleAppleReviews():
 # Utility functions
 # ==============================================================================
 
-def calculateStatistics(entries):
+def calculateStatistics(entries, stopwords):
     # Arrange
     averageSentiment = 0
     averageRating = 0
     textCorpus = ""
     stars = []
-    versions = {} 
+    ratings = {} 
+    sentiments = {}
     statistics = {}
 
     # Iterate
@@ -87,25 +91,38 @@ def calculateStatistics(entries):
         averageRating += entry['stars']
         stars.append(entry['stars'])
         key = entry['version']
-        value = entry['stars']
-        versions[key] = versions.get(key, []) + [value]
+        ratings[key] = ratings.get(key, []) + [entry['stars']]
+        sentiments[key] = sentiments.get(key, []) + [entry['sentiment']]
         textCorpus += f"{entry['title']} {entry['review']} "
 
     # Process
     averageSentiment /= len(entries)
     averageRating /= len(entries)
-    mostCommonWords = dict(Counter(textCorpus.split()).most_common(50))
+    textCorpus = textCorpus.translate(str.maketrans('', '', string.punctuation))
+    words = dict(Counter(textCorpus.lower().split()).most_common(150))
+    mostCommonWords = {k: words[k] for k in words if k not in stopwords}
     ratingDistribution = dict(Counter(stars).most_common(6))
-    result = map(lambda v: (v[0], sum(v[1]) / len(v[1])), versions.items())
-    averagePerVersion = dict(result) 
+    ratingPerVersion = dict(map(lambda v: (v[0], sum(v[1]) / len(v[1])), ratings.items()))
+    sentimentPerVersion = dict(map(lambda v: (v[0], sum(v[1]) / len(v[1])), sentiments.items()))
 
     # Pack
     statistics['averageRating'] = averageRating
     statistics['averageSentiment'] = averageSentiment
-    statistics['averagePerVersion'] = averagePerVersion
+    statistics['ratingPerVersion'] = ratingPerVersion
+    statistics['sentimentPerVersion'] = sentimentPerVersion
     statistics['mostCommonWords'] = mostCommonWords
     statistics['ratingDistribution'] = ratingDistribution
     return statistics
+
+def localStopwords(country):
+    if country == 'nl':
+        return nltk.corpus.stopwords.words('dutch')
+    elif country == 'fr' or country == 'be':
+        return nltk.corpus.stopwords.words('french')
+    elif country == 'de':
+        return nltk.corpus.stopwords.words('german')
+    else:
+        return nltk.corpus.stopwords.words('english')
 
 async def fetch_appstore_reviews(session, url):
     async with session.get(url) as resp:
