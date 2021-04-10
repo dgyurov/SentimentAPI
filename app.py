@@ -99,8 +99,9 @@ def calculateStatistics(entries, stopwords):
     averageSentiment /= len(entries)
     averageRating /= len(entries)
     textCorpus = textCorpus.translate(str.maketrans('', '', string.punctuation))
-    words = dict(Counter(textCorpus.lower().split()).most_common(150))
-    mostCommonWords = {k: words[k] for k in words if k not in stopwords}
+    words = Counter(textCorpus.lower().split()).most_common(100)
+    mostCommonWords = {w[0]: w[1] for w in words if w[0] not in stopwords}
+    print(mostCommonWords)
     ratingDistribution = dict(Counter(stars).most_common(6))
     ratingPerVersion = dict(map(lambda v: (v[0], sum(v[1]) / len(v[1])), ratings.items()))
     sentimentPerVersion = dict(map(lambda v: (v[0], sum(v[1]) / len(v[1])), sentiments.items()))
