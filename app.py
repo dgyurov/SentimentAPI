@@ -29,7 +29,7 @@ def appleReviews():
     return handleAppleReviews()
 
 @app.route("/testing", methods=['GET'])
-def appleReviews():
+def testingFunction():
     app.logger.error("Hmmmm")
     return "Everything is good!"
 
