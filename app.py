@@ -28,6 +28,11 @@ nltk.download('stopwords')
 def appleReviews():
     return handleAppleReviews()
 
+@app.route("/testing", methods=['GET'])
+def appleReviews():
+    app.logger.error("Hmmmm")
+    return "Everything is good!"
+
 # ==============================================================================
 # Route handling
 # ==============================================================================
