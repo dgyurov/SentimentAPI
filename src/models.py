@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from marshmallow import Schema, fields, pre_load, pre_dump
+from marshmallow import Schema, fields, pre_load, pre_dump, EXCLUDE
 from datetime import datetime
 
 # ==============================================================================
@@ -9,7 +9,7 @@ from datetime import datetime
 
 class Review(Schema):
     class Meta:
-        unknown = 'EXCLUDE'
+        unknown = EXCLUDE
 
     name = fields.Str()
     title = fields.Str(required=False)
@@ -39,7 +39,7 @@ class Review(Schema):
 
 class AppStoreEntry(Schema):
     class Meta:
-        unknown = 'EXCLUDE'
+        unknown = EXCLUDE
         partial = True
     
     id = fields.Str()
