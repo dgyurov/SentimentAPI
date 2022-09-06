@@ -10,6 +10,3 @@ nltk = "*"
 aiohttp = "*"
 asyncio = "*"
 gunicorn = "*"
-
-[requires]
-python_version = "3.10.6"
